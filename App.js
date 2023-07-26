@@ -1,14 +1,31 @@
+import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, ScrollView, Dimensions } from 'react-native';
+import * as Location from 'expo-location';
 
 const {width:SCREEN_WIDTH} = Dimensions.get("window"); //Dimensions : 해당 핸드폰의 screen size를 알수 있는 API
 
 console.log(SCREEN_WIDTH);
 
 export default function App() {
+  const [city, setCity] = useState("기달려봐...")
+  const [location, setLocation] = useState();
+  const [ok, setOk] = useState(true);
+  const ask = async() => {
+    const {granted} = await Location.requestForegroundPermissionsAsync();
+    if(!granted){
+      setOk(false);
+    }
+    const {coords:{latitude, longitude}} = await Location.getCurrentPositionAsync({accuracy:5});
+    const location = await Location.reverseGeocodeAsync({latitude, longitude}, {useGoogleMaps: false});
+    setCity(location[0].city);
+  };
+  useEffect(() => {
+    ask();
+  }, [])
   return (
     <View style={styles.container}>
       <View style={styles.city}>
-        <Text style={styles.cityName}>Seoul</Text>
+        <Text style={styles.cityName}>{city}</Text>
       </View>
       <ScrollView 
       horizontal
